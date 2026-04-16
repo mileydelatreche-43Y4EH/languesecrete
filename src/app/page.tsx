@@ -1,6 +1,7 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import Image from "next/image";
 import styles from "./page.module.css";
 
 type AppView = "secret" | "languages";
@@ -162,17 +163,6 @@ function SpeakerIcon() {
   );
 }
 
-function CopyIcon() {
-  return (
-    <svg viewBox="0 0 24 24" className={styles.iconSvg} aria-hidden="true">
-      <path
-        fill="currentColor"
-        d="M8 3a2 2 0 0 0-2 2v1H5a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-1h1a2 2 0 0 0 2-2V8.8a2 2 0 0 0-.56-1.39l-2.86-2.99A2 2 0 0 0 13.14 3H8Zm6 2.4 1.72 1.8H14V5.4ZM5 8h8v11H5V8Zm4 3a.9.9 0 1 1 0 1.8H7a.9.9 0 0 1 0-1.8h2Zm2.9 3a.9.9 0 1 1 0 1.8H7a.9.9 0 0 1 0-1.8h4.9Zm0 3a.9.9 0 1 1 0 1.8H7a.9.9 0 0 1 0-1.8h4.9Zm3.1-1h1V9h-2a2 2 0 0 1-2-2V5H8v1h5a2 2 0 0 1 2 2v8Z"
-      />
-    </svg>
-  );
-}
-
 function SwapIcon() {
   return (
     <svg viewBox="0 0 24 24" className={styles.iconSvg} aria-hidden="true">
@@ -218,22 +208,6 @@ function translateLocal(text: string, source: ModeCode, target: ModeCode) {
   return convertWithMap(text, SECRET_REVERSE_MAP);
 }
 
-function translateLanguageText(
-  text: string,
-  source: LanguageCode,
-  target: LanguageCode,
-) {
-  if (!text.trim()) {
-    return "";
-  }
-
-  if (source === target) {
-    return text;
-  }
-
-  return `[${source.toUpperCase()} -> ${target.toUpperCase()}] ${text}`;
-}
-
 function getOppositeMode(mode: ModeCode): ModeCode {
   return mode === "normal" ? "secret" : "normal";
 }
@@ -271,15 +245,81 @@ export default function Home() {
   const [sourceLanguageQuery, setSourceLanguageQuery] = useState("Francais");
   const [targetLanguageQuery, setTargetLanguageQuery] = useState("Anglais");
   const [sourceText, setSourceText] = useState("NPAKPIT VITDPT");
+  const [languageTranslatedText, setLanguageTranslatedText] = useState("");
+  const [languageResultKey, setLanguageResultKey] = useState("");
   const [isListening, setIsListening] = useState(false);
   const [copyStatus, setCopyStatus] = useState<"idle" | "copied">("idle");
+  const currentLanguageKey = `${sourceLanguage}:${targetLanguage}:${sourceText}`;
 
   const translatedText = useMemo(() => {
     if (appView === "secret") {
       return translateLocal(sourceText, sourceMode, targetMode);
     }
-    return translateLanguageText(sourceText, sourceLanguage, targetLanguage);
-  }, [appView, sourceText, sourceMode, targetMode, sourceLanguage, targetLanguage]);
+
+    if (!sourceText.trim()) {
+      return "";
+    }
+
+    if (sourceLanguage === targetLanguage) {
+      return sourceText;
+    }
+
+    return languageResultKey === currentLanguageKey ? languageTranslatedText : sourceText;
+  }, [
+    appView,
+    sourceText,
+    sourceMode,
+    targetMode,
+    sourceLanguage,
+    targetLanguage,
+    languageTranslatedText,
+    languageResultKey,
+    currentLanguageKey,
+  ]);
+
+  useEffect(() => {
+    if (appView !== "languages") {
+      return;
+    }
+
+    const trimmedText = sourceText.trim();
+    if (!trimmedText || sourceLanguage === targetLanguage) {
+      return;
+    }
+
+    const controller = new AbortController();
+    const timeout = window.setTimeout(async () => {
+      try {
+        const response = await fetch("/api/translate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            text: sourceText,
+            sourceLanguage,
+            targetLanguage,
+          }),
+          signal: controller.signal,
+        });
+
+        if (!response.ok) {
+          setLanguageTranslatedText(sourceText);
+          return;
+        }
+
+        const data = (await response.json()) as { translatedText?: string };
+        setLanguageTranslatedText(data.translatedText ?? sourceText);
+        setLanguageResultKey(`${sourceLanguage}:${targetLanguage}:${sourceText}`);
+      } catch {
+        setLanguageTranslatedText(sourceText);
+        setLanguageResultKey(`${sourceLanguage}:${targetLanguage}:${sourceText}`);
+      }
+    }, 240);
+
+    return () => {
+      controller.abort();
+      window.clearTimeout(timeout);
+    };
+  }, [appView, sourceText, sourceLanguage, targetLanguage]);
 
   const sourceVoice = useMemo(
     () =>
@@ -537,7 +577,13 @@ export default function Home() {
                 {copyStatus === "copied" ? (
                   <span className={styles.iconGlyph}>✓</span>
                 ) : (
-                  <CopyIcon />
+                  <Image
+                    src="/icons/copy-icon.png"
+                    alt="Copier"
+                    width={24}
+                    height={24}
+                    className={styles.iconPng}
+                  />
                 )}
               </button>
               <button

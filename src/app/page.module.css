@@ -169,6 +169,12 @@
   display: block;
 }
 
+.iconPng {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+}
+
 .iconButton[aria-pressed="true"] {
   color: #f3f3f3;
   background: #3a3a3a;
