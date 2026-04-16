@@ -240,7 +240,9 @@ export default function Home() {
     }
 
     const controller = new AbortController();
-    const timeout = window.setTimeout(async () => {
+    const activeKey = `${sourceLanguage}:${targetLanguage}:${sourceText}`;
+
+    const runTranslation = async () => {
       try {
         const response = await fetch("/api/translate", {
           method: "POST",
@@ -255,21 +257,26 @@ export default function Home() {
 
         if (!response.ok) {
           setLanguageTranslatedText(sourceText);
+          setLanguageResultKey(activeKey);
           return;
         }
 
         const data = (await response.json()) as { translatedText?: string };
         setLanguageTranslatedText(data.translatedText ?? sourceText);
-        setLanguageResultKey(`${sourceLanguage}:${targetLanguage}:${sourceText}`);
+        setLanguageResultKey(activeKey);
       } catch {
+        if (controller.signal.aborted) {
+          return;
+        }
         setLanguageTranslatedText(sourceText);
-        setLanguageResultKey(`${sourceLanguage}:${targetLanguage}:${sourceText}`);
+        setLanguageResultKey(activeKey);
       }
-    }, 240);
+    };
+
+    void runTranslation();
 
     return () => {
       controller.abort();
-      window.clearTimeout(timeout);
     };
   }, [appView, sourceText, sourceLanguage, targetLanguage]);
 

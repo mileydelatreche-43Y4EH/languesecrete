@@ -144,6 +144,8 @@
 .panelActions {
   display: flex;
   gap: 10px;
+  padding-left: 8px;
+  padding-bottom: 6px;
 }
 
 .iconButton {
