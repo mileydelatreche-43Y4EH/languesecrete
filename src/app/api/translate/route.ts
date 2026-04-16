@@ -50,7 +50,12 @@ export async function POST(request: Request) {
 
     const payload = (await response.json()) as unknown;
     const translatedText = parseGoogleTranslatePayload(payload) || text;
-    return NextResponse.json({ translatedText });
+
+    // Google renvoie la langue détectée en payload[2]
+    const detectedLanguage =
+      Array.isArray(payload) && typeof payload[2] === "string" ? payload[2] : null;
+
+    return NextResponse.json({ translatedText, detectedLanguage });
   } catch {
     return NextResponse.json({ translatedText: "" }, { status: 200 });
   }

@@ -431,10 +431,6 @@ export default function Home() {
       return "";
     }
 
-    if (sourceLanguage === targetLanguage) {
-      return sourceText;
-    }
-
     return languageTranslatedText;
   }, [
     appView,
@@ -452,7 +448,7 @@ export default function Home() {
     }
 
     const trimmedText = sourceText.trim();
-    if (!trimmedText || sourceLanguage === targetLanguage) {
+    if (!trimmedText) {
       return;
     }
 
@@ -464,7 +460,7 @@ export default function Home() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             text: sourceText,
-            sourceLanguage,
+            sourceLanguage: "auto",
             targetLanguage,
           }),
           signal: controller.signal,
@@ -475,8 +471,19 @@ export default function Home() {
           return;
         }
 
-        const data = (await response.json()) as { translatedText?: string };
+        const data = (await response.json()) as {
+          translatedText?: string;
+          detectedLanguage?: string;
+        };
         setLanguageTranslatedText(data.translatedText ?? sourceText);
+
+        // Met à jour le sélecteur source si la langue détectée est dans notre liste
+        if (data.detectedLanguage) {
+          const detected = data.detectedLanguage as LanguageCode;
+          if (LANGUAGES.some((l) => l.code === detected) && detected !== sourceLanguage) {
+            setSourceLanguage(detected);
+          }
+        }
       } catch {
         if (controller.signal.aborted) {
           return;

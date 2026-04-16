@@ -10,7 +10,7 @@
 }
 
 .pageLight {
-  background: radial-gradient(circle at 20% 16%, #d7dbe1 0%, #c8ced7 52%, #b9c1cc 100%);
+  background: radial-gradient(circle at 20% 16%, #b8bfc9 0%, #a9b1bc 52%, #9aa4b0 100%);
 }
 
 .main {
@@ -52,18 +52,18 @@
 }
 
 .pageLight .topModeSwitch {
-  background: #d6dce5;
-  border-color: #afb8c6;
+  background: #b2bac5;
+  border-color: #8f99a8;
 }
 
 .pageLight .viewButton {
-  color: #364152;
+  color: #2b3749;
 }
 
 .pageLight .viewButtonActive {
-  background: #c8d0dc;
-  border-color: #a9b4c4;
-  color: #111827;
+  background: #a4aebb;
+  border-color: #8a96a6;
+  color: #0f1924;
 }
 
 .translator {
@@ -89,8 +89,8 @@
 }
 
 .pageLight .panel {
-  background: #d3d9e2;
-  border-color: #b4bdca;
+  background: #b0b9c4;
+  border-color: #8f9aaa;
 }
 
 .panelTop {
@@ -115,10 +115,10 @@
 }
 
 .pageLight .languageSelect {
-  border-color: #adb7c6;
-  background-color: #dce2ea;
-  color: #111827;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23111827' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  border-color: #8d98a8;
+  background-color: #b8c0cb;
+  color: #0f1924;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%230f1924' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right 16px center;
 }
@@ -169,8 +169,8 @@
 }
 
 .pageLight .textarea {
-  background: #dfe5ed;
-  color: #111827;
+  background: #bcc4ce;
+  color: #0f1924;
 }
 
 .textarea:focus {
@@ -188,7 +188,7 @@
 }
 
 .pageLight .textarea::placeholder {
-  color: #7b8799;
+  color: #5a6575;
 }
 
 .panelActions {
@@ -213,7 +213,8 @@
 }
 
 .pageLight .iconButton {
-  color: #6b7280;
+  color: #3a4555;
+  filter: brightness(0) saturate(100%) invert(22%) sepia(12%) saturate(600%) hue-rotate(185deg) brightness(85%);
 }
 
 .iconButton:hover {
