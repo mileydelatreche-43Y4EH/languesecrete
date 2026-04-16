@@ -14,16 +14,21 @@
   display: grid;
   place-items: center;
   gap: 12px;
+  padding-top: 64px;
 }
 
 .topModeSwitch {
+  position: fixed;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
   display: inline-flex;
   gap: 8px;
   background: #1f1f1f;
   border: 1px solid #3b3b3b;
   border-radius: 12px;
   padding: 6px;
-  transform: translateY(-10px);
+  z-index: 20;
 }
 
 .viewButton {
@@ -142,12 +147,12 @@
 }
 
 .iconButton {
-  border: 1px solid #4a4a4a;
-  border-radius: 10px;
-  background: #2a2a2a;
+  border: none;
+  border-radius: 0;
+  background: transparent;
   color: #e2e2e2;
-  width: 52px;
-  height: 40px;
+  width: 30px;
+  height: 30px;
   display: grid;
   place-items: center;
   padding: 0;
@@ -156,7 +161,7 @@
 }
 
 .iconButton:hover {
-  background: #353535;
+  color: #ffffff;
 }
 
 .iconGlyph {
@@ -177,7 +182,6 @@
 
 .iconButton[aria-pressed="true"] {
   color: #f3f3f3;
-  background: #3a3a3a;
 }
 
 .swapWrap {
@@ -186,18 +190,19 @@
 }
 
 .swapButton {
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  border: 1px solid #4a4a4a;
-  background: #2a2a2a;
-  color: #dfdfdf;
-  font-size: 18px;
+  width: 34px;
+  height: 34px;
+  border: none;
+  background: transparent;
+  color: #f0f0f0;
+  display: grid;
+  place-items: center;
+  padding: 0;
   cursor: pointer;
 }
 
 .swapButton:hover {
-  background: #353535;
+  color: #ffffff;
 }
 
 @media (max-width: 950px) {

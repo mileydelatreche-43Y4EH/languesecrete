@@ -141,28 +141,6 @@ type WebkitWindow = Window & {
   webkitSpeechRecognition?: new () => SpeechRecognitionLike;
 };
 
-function MicIcon() {
-  return (
-    <svg viewBox="0 0 24 24" className={styles.iconSvg} aria-hidden="true">
-      <path
-        fill="currentColor"
-        d="M12 14a3 3 0 0 0 3-3V7a3 3 0 1 0-6 0v4a3 3 0 0 0 3 3Zm5-3a1 1 0 1 1 2 0 7 7 0 1 1-14 0 1 1 0 1 1 2 0 5 5 0 0 0 10 0Zm-4 8a1 1 0 1 1-2 0v-2a1 1 0 1 1 2 0v2Z"
-      />
-    </svg>
-  );
-}
-
-function SpeakerIcon() {
-  return (
-    <svg viewBox="0 0 24 24" className={styles.iconSvg} aria-hidden="true">
-      <path
-        fill="currentColor"
-        d="M13.5 4.5a1 1 0 0 1 1.707.707v13.586a1 1 0 0 1-1.707.707L8.207 14.207H5a1 1 0 0 1-1-1V10.79a1 1 0 0 1 1-1h3.207L13.5 4.5Zm4.702 1.605a1 1 0 0 1 1.414-.054 8 8 0 0 1 0 11.897 1 1 0 0 1-1.36-1.468 6 6 0 0 0 0-8.961 1 1 0 0 1-.054-1.414Zm-2.44 2.42a1 1 0 0 1 1.41-.084 4.8 4.8 0 0 1 0 7.117 1 1 0 1 1-1.326-1.498 2.8 2.8 0 0 0 0-4.12 1 1 0 0 1-.084-1.414Z"
-      />
-    </svg>
-  );
-}
-
 function SwapIcon() {
   return (
     <svg viewBox="0 0 24 24" className={styles.iconSvg} aria-hidden="true">
@@ -426,7 +404,6 @@ export default function Home() {
                   value={sourceLanguage}
                   onChange={(event) => {
                     setSourceLanguage(event.target.value as LanguageCode);
-                    setSourceText("");
                   }}
                 >
                   {LANGUAGES.map((language) => (
@@ -454,7 +431,13 @@ export default function Home() {
                 aria-label="Dictee vocale"
                 aria-pressed={isListening}
               >
-                <MicIcon />
+                <Image
+                  src="/icons/mic-icon.png"
+                  alt="Micro"
+                  width={24}
+                  height={24}
+                  className={styles.iconPng}
+                />
               </button>
               <button
                 type="button"
@@ -463,7 +446,13 @@ export default function Home() {
                 title="Lire le texte"
                 aria-label="Lire le texte"
               >
-                <SpeakerIcon />
+                <Image
+                  src="/icons/speaker-icon.png"
+                  alt="Audio"
+                  width={24}
+                  height={24}
+                  className={styles.iconPng}
+                />
               </button>
             </div>
           </article>
@@ -499,7 +488,6 @@ export default function Home() {
                   value={targetLanguage}
                   onChange={(event) => {
                     setTargetLanguage(event.target.value as LanguageCode);
-                    setSourceText("");
                   }}
                 >
                   {LANGUAGES.map((language) => (
@@ -545,7 +533,13 @@ export default function Home() {
                 title="Lire la traduction"
                 aria-label="Lire la traduction"
               >
-                <SpeakerIcon />
+                <Image
+                  src="/icons/speaker-icon.png"
+                  alt="Audio"
+                  width={24}
+                  height={24}
+                  className={styles.iconPng}
+                />
               </button>
             </div>
           </article>
