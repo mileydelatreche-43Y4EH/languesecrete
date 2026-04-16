@@ -73,6 +73,28 @@ type WebkitWindow = Window & {
   webkitSpeechRecognition?: new () => SpeechRecognitionLike;
 };
 
+function MicIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className={styles.iconSvg} aria-hidden="true">
+      <path
+        fill="currentColor"
+        d="M12 14a3 3 0 0 0 3-3V7a3 3 0 1 0-6 0v4a3 3 0 0 0 3 3Zm5-3a1 1 0 1 1 2 0 7 7 0 1 1-14 0 1 1 0 1 1 2 0 5 5 0 0 0 10 0Zm-4 8a1 1 0 1 1-2 0v-2a1 1 0 1 1 2 0v2Z"
+      />
+    </svg>
+  );
+}
+
+function SpeakerIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className={styles.iconSvg} aria-hidden="true">
+      <path
+        fill="currentColor"
+        d="M13.5 4.5a1 1 0 0 1 1.707.707v13.586a1 1 0 0 1-1.707.707L8.207 14.207H5a1 1 0 0 1-1-1V10.79a1 1 0 0 1 1-1h3.207L13.5 4.5Zm4.702 1.605a1 1 0 0 1 1.414-.054 8 8 0 0 1 0 11.897 1 1 0 0 1-1.36-1.468 6 6 0 0 0 0-8.961 1 1 0 0 1-.054-1.414Zm-2.44 2.42a1 1 0 0 1 1.41-.084 4.8 4.8 0 0 1 0 7.117 1 1 0 1 1-1.326-1.498 2.8 2.8 0 0 0 0-4.12 1 1 0 0 1-.084-1.414Z"
+      />
+    </svg>
+  );
+}
+
 const SECRET_REVERSE_MAP: Record<string, string> = Object.fromEntries(
   Object.entries(SECRET_MAP).map(([from, to]) => [to, from]),
 );
@@ -228,16 +250,19 @@ export default function Home() {
                 className={styles.iconButton}
                 onClick={startVoiceInput}
                 title="Dictee vocale"
+                aria-label="Dictee vocale"
+                aria-pressed={isListening}
               >
-                {isListening ? "● Micro actif" : "Micro"}
+                <MicIcon />
               </button>
               <button
                 type="button"
                 className={styles.iconButton}
                 onClick={() => speakText(sourceText, sourceVoice)}
                 title="Lire le texte"
+                aria-label="Lire le texte"
               >
-                Audio
+                <SpeakerIcon />
               </button>
             </div>
           </article>
@@ -281,16 +306,20 @@ export default function Home() {
                 className={styles.iconButton}
                 onClick={copyTarget}
                 title="Copier la traduction"
+                aria-label="Copier la traduction"
               >
-                {copyStatus === "copied" ? "Copie" : "Copier"}
+                <span className={styles.iconGlyph}>
+                  {copyStatus === "copied" ? "✓" : "⧉"}
+                </span>
               </button>
               <button
                 type="button"
                 className={styles.iconButton}
                 onClick={() => speakText(translatedText, targetVoice)}
                 title="Lire la traduction"
+                aria-label="Lire la traduction"
               >
-                Audio
+                <SpeakerIcon />
               </button>
             </div>
           </article>
