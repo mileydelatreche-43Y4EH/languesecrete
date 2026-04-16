@@ -194,15 +194,134 @@ function getOppositeMode(mode: ModeCode): ModeCode {
   return mode === "normal" ? "secret" : "normal";
 }
 
-function detectSecretInputMode(text: string): ModeCode {
+function languageNaturalScore(text: string) {
   const letters = text.toLowerCase().replace(/[^a-z]/g, "");
   if (!letters) {
-    return "normal";
+    return 0;
   }
 
   const vowels = letters.match(/[aeiouy]/g)?.length ?? 0;
   const vowelRatio = vowels / letters.length;
-  return vowelRatio < 0.28 ? "secret" : "normal";
+  const patterns = [
+    "ou",
+    "on",
+    "ai",
+    "au",
+    "eu",
+    "er",
+    "re",
+    "le",
+    "de",
+    "la",
+    "en",
+    "es",
+    "qu",
+    "ch",
+    "tion",
+  ];
+  const patternHits = patterns.reduce((count, pattern) => {
+    return count + (letters.includes(pattern) ? 1 : 0);
+  }, 0);
+
+  return vowelRatio + patternHits * 0.032;
+}
+
+function detectSecretInputMode(text: string): ModeCode {
+  const lowerText = text.toLowerCase().trim();
+  if (!lowerText) {
+    return "normal";
+  }
+
+  // Evite les faux positifs sur commandes, code, acronymes et abreviations courantes.
+  const knownNormalTokens = new Set([
+    "npm",
+    "run",
+    "build",
+    "start",
+    "dev",
+    "git",
+    "api",
+    "url",
+    "cmd",
+    "cli",
+    "http",
+    "https",
+    "www",
+    "slt",
+    "cv",
+    "r",
+    "ok",
+    "stp",
+    "svp",
+    "mdr",
+    "lol",
+    "tg",
+    "wsh",
+    "js",
+    "ts",
+    "css",
+    "html",
+  ]);
+
+  const rawTokens = lowerText.split(/\s+/g).filter(Boolean);
+  if (
+    rawTokens.some(
+      (token) =>
+        token.includes("/") ||
+        token.includes("-") ||
+        token.includes("_") ||
+        token.includes(".") ||
+        /\d/.test(token),
+    )
+  ) {
+    return "normal";
+  }
+
+  const plainTokens = rawTokens.map((token) => token.replace(/[^a-z0-9]/g, ""));
+  if (plainTokens.some((token) => knownNormalTokens.has(token))) {
+    return "normal";
+  }
+
+  if (plainTokens.every((token) => token.length <= 3)) {
+    return "normal";
+  }
+
+  const words = text
+    .toLowerCase()
+    .split(/[^a-z]+/g)
+    .filter((word) => word.length > 1);
+
+  if (words.length === 0) {
+    return "normal";
+  }
+
+  let totalDelta = 0;
+  let strongSecretWords = 0;
+  let analyzableWords = 0;
+
+  for (const word of words) {
+    if (word.length < 4) {
+      continue;
+    }
+    analyzableWords += 1;
+    const decodedWord = convertWithMap(word, SECRET_REVERSE_MAP);
+    const inputScore = languageNaturalScore(word);
+    const decodedScore = languageNaturalScore(decodedWord);
+    const weight = Math.min(2, word.length / 4);
+    const delta = decodedScore - inputScore;
+    totalDelta += delta * weight;
+    if (delta > 0.11) {
+      strongSecretWords += 1;
+    }
+  }
+
+  // Mode strict: on passe en secret uniquement avec forte confiance.
+  if (analyzableWords === 0) {
+    return "normal";
+  }
+
+  const strongWordRatio = strongSecretWords / analyzableWords;
+  return totalDelta > 0.3 && strongWordRatio >= 0.45 ? "secret" : "normal";
 }
 
 export default function Home() {
