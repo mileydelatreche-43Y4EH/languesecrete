@@ -13,8 +13,23 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Traducteur Local",
-  description: "Prototype de traducteur avec interface type Google Translate.",
+  title: "SecretTrad — Traducteur & Langage secret",
+  description:
+    "Traduis du texte dans n'importe quelle langue, ou utilise notre langage secret personnel. Rapide, simple, et disponible partout.",
+  openGraph: {
+    title: "SecretTrad — Traducteur & Langage secret",
+    description:
+      "Traduis du texte dans n'importe quelle langue, ou utilise notre langage secret personnel. Rapide, simple, et disponible partout.",
+    type: "website",
+    locale: "fr_FR",
+  },
+  twitter: {
+    card: "summary",
+    title: "SecretTrad — Traducteur & Langage secret",
+    description:
+      "Traduis du texte dans n'importe quelle langue, ou utilise notre langage secret personnel.",
+  },
+  keywords: ["traducteur", "langage secret", "traduction", "chiffrement", "code secret"],
 };
 
 export default function RootLayout({

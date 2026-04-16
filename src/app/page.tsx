@@ -330,7 +330,7 @@ export default function Home() {
   const [targetMode, setTargetMode] = useState<ModeCode>("normal");
   const [sourceLanguage, setSourceLanguage] = useState<LanguageCode>("fr");
   const [targetLanguage, setTargetLanguage] = useState<LanguageCode>("en");
-  const [sourceText, setSourceText] = useState("NPAKPIT VITDPT");
+  const [sourceText, setSourceText] = useState("");
   const [languageTranslatedText, setLanguageTranslatedText] = useState("");
   const [isListening, setIsListening] = useState(false);
   const [copyStatus, setCopyStatus] = useState<"idle" | "copied">("idle");
@@ -521,7 +521,6 @@ export default function Home() {
                     const nextSourceMode = event.target.value as ModeCode;
                     setSourceMode(nextSourceMode);
                     setTargetMode(getOppositeMode(nextSourceMode));
-                    setSourceText("");
                   }}
                 >
                   {MODES.map((mode) => (
@@ -615,7 +614,6 @@ export default function Home() {
                     const nextTargetMode = event.target.value as ModeCode;
                     setTargetMode(nextTargetMode);
                     setSourceMode(getOppositeMode(nextTargetMode));
-                    setSourceText("");
                   }}
                 >
                   {MODES.map((mode) => (
