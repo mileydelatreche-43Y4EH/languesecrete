@@ -212,38 +212,12 @@ function getOppositeMode(mode: ModeCode): ModeCode {
   return mode === "normal" ? "secret" : "normal";
 }
 
-function getLanguageLabel(code: LanguageCode) {
-  return LANGUAGES.find((language) => language.code === code)?.label ?? "Francais";
-}
-
-function resolveLanguageCode(query: string, fallback: LanguageCode): LanguageCode {
-  const cleaned = query.trim().toLowerCase();
-  if (!cleaned) {
-    return fallback;
-  }
-
-  const exactMatch = LANGUAGES.find(
-    (language) =>
-      language.label.toLowerCase() === cleaned || language.code.toLowerCase() === cleaned,
-  );
-  if (exactMatch) {
-    return exactMatch.code;
-  }
-
-  const partialMatch = LANGUAGES.find((language) =>
-    language.label.toLowerCase().startsWith(cleaned),
-  );
-  return partialMatch?.code ?? fallback;
-}
-
 export default function Home() {
   const [appView, setAppView] = useState<AppView>("secret");
   const [sourceMode, setSourceMode] = useState<ModeCode>("secret");
   const [targetMode, setTargetMode] = useState<ModeCode>("normal");
   const [sourceLanguage, setSourceLanguage] = useState<LanguageCode>("fr");
   const [targetLanguage, setTargetLanguage] = useState<LanguageCode>("en");
-  const [sourceLanguageQuery, setSourceLanguageQuery] = useState("Francais");
-  const [targetLanguageQuery, setTargetLanguageQuery] = useState("Anglais");
   const [sourceText, setSourceText] = useState("NPAKPIT VITDPT");
   const [languageTranslatedText, setLanguageTranslatedText] = useState("");
   const [languageResultKey, setLanguageResultKey] = useState("");
@@ -343,8 +317,6 @@ export default function Home() {
     } else {
       setSourceLanguage(targetLanguage);
       setTargetLanguage(sourceLanguage);
-      setSourceLanguageQuery(getLanguageLabel(targetLanguage));
-      setTargetLanguageQuery(getLanguageLabel(sourceLanguage));
     }
     setSourceText(translatedText);
   };
@@ -422,8 +394,6 @@ export default function Home() {
             onClick={() => {
               setAppView("languages");
               setSourceText("");
-              setSourceLanguageQuery(getLanguageLabel(sourceLanguage));
-              setTargetLanguageQuery(getLanguageLabel(targetLanguage));
             }}
           >
             Mode langues
@@ -451,29 +421,20 @@ export default function Home() {
                   ))}
                 </select>
               ) : (
-                <>
-                  <input
-                    className={styles.languageSearch}
-                    list="source-language-options"
-                    value={sourceLanguageQuery}
-                    onChange={(event) => {
-                      const nextQuery = event.target.value;
-                      setSourceLanguageQuery(nextQuery);
-                      const nextCode = resolveLanguageCode(nextQuery, sourceLanguage);
-                      setSourceLanguage(nextCode);
-                      setSourceText("");
-                    }}
-                    onBlur={() => {
-                      setSourceLanguageQuery(getLanguageLabel(sourceLanguage));
-                    }}
-                    placeholder="Rechercher une langue..."
-                  />
-                  <datalist id="source-language-options">
-                    {LANGUAGES.map((language) => (
-                      <option key={language.code} value={language.label} />
-                    ))}
-                  </datalist>
-                </>
+                <select
+                  className={styles.languageSelect}
+                  value={sourceLanguage}
+                  onChange={(event) => {
+                    setSourceLanguage(event.target.value as LanguageCode);
+                    setSourceText("");
+                  }}
+                >
+                  {LANGUAGES.map((language) => (
+                    <option key={language.code} value={language.code}>
+                      {language.label}
+                    </option>
+                  ))}
+                </select>
               )}
             </div>
 
@@ -533,29 +494,20 @@ export default function Home() {
                   ))}
                 </select>
               ) : (
-                <>
-                  <input
-                    className={styles.languageSearch}
-                    list="target-language-options"
-                    value={targetLanguageQuery}
-                    onChange={(event) => {
-                      const nextQuery = event.target.value;
-                      setTargetLanguageQuery(nextQuery);
-                      const nextCode = resolveLanguageCode(nextQuery, targetLanguage);
-                      setTargetLanguage(nextCode);
-                      setSourceText("");
-                    }}
-                    onBlur={() => {
-                      setTargetLanguageQuery(getLanguageLabel(targetLanguage));
-                    }}
-                    placeholder="Rechercher une langue..."
-                  />
-                  <datalist id="target-language-options">
-                    {LANGUAGES.map((language) => (
-                      <option key={language.code} value={language.label} />
-                    ))}
-                  </datalist>
-                </>
+                <select
+                  className={styles.languageSelect}
+                  value={targetLanguage}
+                  onChange={(event) => {
+                    setTargetLanguage(event.target.value as LanguageCode);
+                    setSourceText("");
+                  }}
+                >
+                  {LANGUAGES.map((language) => (
+                    <option key={language.code} value={language.code}>
+                      {language.label}
+                    </option>
+                  ))}
+                </select>
               )}
             </div>
 
