@@ -8,6 +8,10 @@
   padding: 24px;
 }
 
+.pageLight {
+  background: radial-gradient(circle at 20% 16%, #f3f4f6 0%, #e9ebef 52%, #dfe3e8 100%);
+}
+
 .main {
   width: 100%;
   max-width: 980px;
@@ -47,6 +51,21 @@
   color: #f1f1f1;
 }
 
+.pageLight .topModeSwitch {
+  background: #eef1f5;
+  border-color: #cfd5de;
+}
+
+.pageLight .viewButton {
+  color: #4b5563;
+}
+
+.pageLight .viewButtonActive {
+  background: #e3e8ef;
+  border-color: #bcc6d3;
+  color: #111827;
+}
+
 .translator {
   display: grid;
   grid-template-columns: minmax(320px, 460px) auto minmax(320px, 460px);
@@ -67,6 +86,11 @@
   display: flex;
   flex-direction: column;
   gap: 12px;
+}
+
+.pageLight .panel {
+  background: #eef1f5;
+  border-color: #ced4dd;
 }
 
 .panelTop {
@@ -90,9 +114,22 @@
   background-position: right 16px center;
 }
 
+.pageLight .languageSelect {
+  border-color: #c8cfd9;
+  background-color: #f2f4f7;
+  color: #111827;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23111827' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 16px center;
+}
+
 .languageSelect:focus {
   outline: 2px solid #707070;
   outline-offset: 1px;
+}
+
+.pageLight .languageSelect:focus {
+  outline-color: #94a3b8;
 }
 
 .languageSearch {
@@ -131,14 +168,27 @@
   font-weight: 400;
 }
 
+.pageLight .textarea {
+  background: #f1f4f8;
+  color: #111827;
+}
+
 .textarea:focus {
   outline: 2px solid #707070;
   outline-offset: 1px;
 }
 
+.pageLight .textarea:focus {
+  outline-color: #94a3b8;
+}
+
 .textarea::placeholder {
   color: #b6b6b6;
   font-size: 0.82em;
+}
+
+.pageLight .textarea::placeholder {
+  color: #94a3b8;
 }
 
 .panelActions {
@@ -153,8 +203,8 @@
   border-radius: 0;
   background: transparent;
   color: #e2e2e2;
-  width: 30px;
-  height: 30px;
+  width: 26px;
+  height: 26px;
   display: grid;
   place-items: center;
   padding: 0;
@@ -162,8 +212,16 @@
   cursor: pointer;
 }
 
+.pageLight .iconButton {
+  color: #6b7280;
+}
+
 .iconButton:hover {
   color: #ffffff;
+}
+
+.pageLight .iconButton:hover {
+  color: #111827;
 }
 
 .iconGlyph {
@@ -171,14 +229,15 @@
 }
 
 .iconSvg {
-  width: 24px;
-  height: 24px;
+  width: 28px;
+  height: 28px;
   display: block;
+  filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.35));
 }
 
 .iconPng {
-  width: 24px;
-  height: 24px;
+  width: 20px;
+  height: 20px;
   object-fit: contain;
 }
 
@@ -192,19 +251,34 @@
 }
 
 .swapButton {
-  width: 34px;
-  height: 34px;
+  width: 36px;
+  height: 36px;
   border: none;
   background: transparent;
-  color: #f0f0f0;
+  color: #f7f7f7;
   display: grid;
   place-items: center;
   padding: 0;
   cursor: pointer;
 }
 
+.swapIcon {
+  width: 26px;
+  height: 26px;
+  display: block;
+}
+
+.pageLight .swapButton {
+  color: #6b7280;
+}
+
 .swapButton:hover {
   color: #ffffff;
+  filter: brightness(1.08);
+}
+
+.pageLight .swapButton:hover {
+  color: #111827;
 }
 
 @media (max-width: 950px) {

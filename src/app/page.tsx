@@ -143,10 +143,14 @@ type WebkitWindow = Window & {
 
 function SwapIcon() {
   return (
-    <svg viewBox="0 0 24 24" className={styles.iconSvg} aria-hidden="true">
+    <svg viewBox="0 0 24 24" className={styles.swapIcon} aria-hidden="true">
       <path
-        fill="currentColor"
-        d="M14.5 6a1 1 0 0 1 1.4 0l3.1 3.1a1 1 0 0 1 0 1.4l-3.1 3.1a1 1 0 1 1-1.4-1.4L16.9 10H6a1 1 0 1 1 0-2h10.9l-2.4-2.3a1 1 0 0 1 0-1.4Zm-5 4.4a1 1 0 0 1 0 1.4L7.1 14H18a1 1 0 1 1 0 2H7.1l2.4 2.3a1 1 0 1 1-1.4 1.4L5 16.6a1 1 0 0 1 0-1.4l3.1-3.1a1 1 0 0 1 1.4 0Z"
+        d="M7 7h12m0 0-3-3m3 3-3 3M17 17H5m0 0 3-3m-3 3 3 3"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2.4"
+        strokeLinecap="round"
+        strokeLinejoin="round"
       />
     </svg>
   );
@@ -190,6 +194,17 @@ function getOppositeMode(mode: ModeCode): ModeCode {
   return mode === "normal" ? "secret" : "normal";
 }
 
+function detectSecretInputMode(text: string): ModeCode {
+  const letters = text.toLowerCase().replace(/[^a-z]/g, "");
+  if (!letters) {
+    return "normal";
+  }
+
+  const vowels = letters.match(/[aeiouy]/g)?.length ?? 0;
+  const vowelRatio = vowels / letters.length;
+  return vowelRatio < 0.28 ? "secret" : "normal";
+}
+
 export default function Home() {
   const [appView, setAppView] = useState<AppView>("secret");
   const [sourceMode, setSourceMode] = useState<ModeCode>("secret");
@@ -198,10 +213,8 @@ export default function Home() {
   const [targetLanguage, setTargetLanguage] = useState<LanguageCode>("en");
   const [sourceText, setSourceText] = useState("NPAKPIT VITDPT");
   const [languageTranslatedText, setLanguageTranslatedText] = useState("");
-  const [languageResultKey, setLanguageResultKey] = useState("");
   const [isListening, setIsListening] = useState(false);
   const [copyStatus, setCopyStatus] = useState<"idle" | "copied">("idle");
-  const currentLanguageKey = `${sourceLanguage}:${targetLanguage}:${sourceText}`;
 
   const translatedText = useMemo(() => {
     if (appView === "secret") {
@@ -216,7 +229,7 @@ export default function Home() {
       return sourceText;
     }
 
-    return languageResultKey === currentLanguageKey ? languageTranslatedText : sourceText;
+    return languageTranslatedText;
   }, [
     appView,
     sourceText,
@@ -225,8 +238,6 @@ export default function Home() {
     sourceLanguage,
     targetLanguage,
     languageTranslatedText,
-    languageResultKey,
-    currentLanguageKey,
   ]);
 
   useEffect(() => {
@@ -240,8 +251,6 @@ export default function Home() {
     }
 
     const controller = new AbortController();
-    const activeKey = `${sourceLanguage}:${targetLanguage}:${sourceText}`;
-
     const runTranslation = async () => {
       try {
         const response = await fetch("/api/translate", {
@@ -257,19 +266,16 @@ export default function Home() {
 
         if (!response.ok) {
           setLanguageTranslatedText(sourceText);
-          setLanguageResultKey(activeKey);
           return;
         }
 
         const data = (await response.json()) as { translatedText?: string };
         setLanguageTranslatedText(data.translatedText ?? sourceText);
-        setLanguageResultKey(activeKey);
       } catch {
         if (controller.signal.aborted) {
           return;
         }
         setLanguageTranslatedText(sourceText);
-        setLanguageResultKey(activeKey);
       }
     };
 
@@ -360,7 +366,7 @@ export default function Home() {
   };
 
   return (
-    <div className={styles.page}>
+    <div className={`${styles.page} ${appView === "languages" ? styles.pageLight : ""}`}>
       <main className={styles.main}>
         <div className={styles.topModeSwitch}>
           <button
@@ -425,7 +431,17 @@ export default function Home() {
             <textarea
               className={styles.textarea}
               value={sourceText}
-              onChange={(event) => setSourceText(event.target.value)}
+              onChange={(event) => {
+                const nextText = event.target.value;
+                if (appView === "secret") {
+                  const detectedMode = detectSecretInputMode(nextText);
+                  if (detectedMode !== sourceMode) {
+                    setSourceMode(detectedMode);
+                    setTargetMode(getOppositeMode(detectedMode));
+                  }
+                }
+                setSourceText(nextText);
+              }}
               placeholder="Ecrits un textes..."
             />
 
