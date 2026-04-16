@@ -5,7 +5,14 @@ import Image from "next/image";
 import styles from "./page.module.css";
 
 type AppView = "secret" | "languages";
-type ModeCode = "normal" | "secret";
+type ModeCode =
+  | "normal"
+  | "secret"
+  | "mirror"
+  | "shift7"
+  | "rot13"
+  | "azerty"
+  | "double";
 type LanguageCode =
   | "fr"
   | "en"
@@ -73,7 +80,12 @@ type SpeechRecognitionLike = {
 
 const MODES: ModeOption[] = [
   { code: "normal", label: "Texte normal", voice: "fr-FR" },
-  { code: "secret", label: "Langage secret", voice: "fr-FR" },
+  { code: "secret", label: "1", voice: "fr-FR" },
+  { code: "mirror", label: "2", voice: "fr-FR" },
+  { code: "shift7", label: "3", voice: "fr-FR" },
+  { code: "rot13", label: "4", voice: "fr-FR" },
+  { code: "azerty", label: "5", voice: "fr-FR" },
+  { code: "double", label: "6", voice: "fr-FR" },
 ];
 
 const LANGUAGES: LanguageOption[] = [
@@ -136,6 +148,51 @@ const SECRET_MAP: Record<string, string> = {
   n: "a",
 };
 
+const ALPHABET = "abcdefghijklmnopqrstuvwxyz";
+
+// Mode Miroir : A=Z, B=Y, C=X... (symetrique)
+const MIRROR_MAP: Record<string, string> = Object.fromEntries(
+  ALPHABET.split("").map((c, i) => [c, ALPHABET[25 - i]]),
+);
+
+// Mode Decalage +7 : A=H, B=I...
+const SHIFT7_MAP: Record<string, string> = Object.fromEntries(
+  ALPHABET.split("").map((c, i) => [c, ALPHABET[(i + 7) % 26]]),
+);
+const SHIFT7_REVERSE_MAP: Record<string, string> = Object.fromEntries(
+  ALPHABET.split("").map((c, i) => [c, ALPHABET[(i + 19) % 26]]),
+);
+
+// Mode ROT13 : A=N... (symetrique)
+const ROT13_MAP: Record<string, string> = Object.fromEntries(
+  ALPHABET.split("").map((c, i) => [c, ALPHABET[(i + 13) % 26]]),
+);
+
+// Mode Clavier AZERTY : chaque lettre remplacee par sa voisine de droite
+const AZERTY_MAP: Record<string, string> = {
+  a: "z", z: "e", e: "r", r: "t", t: "y", y: "u", u: "i", i: "o", o: "p", p: "a",
+  q: "s", s: "d", d: "f", f: "g", g: "h", h: "j", j: "k", k: "l", l: "m", m: "q",
+  w: "x", x: "c", c: "v", v: "b", b: "n", n: "w",
+};
+const AZERTY_REVERSE_MAP: Record<string, string> = Object.fromEntries(
+  Object.entries(AZERTY_MAP).map(([from, to]) => [to, from]),
+);
+
+const SECRET_REVERSE_MAP: Record<string, string> = Object.fromEntries(
+  Object.entries(SECRET_MAP).map(([from, to]) => [to, from]),
+);
+
+// Mode Double : application deux fois du chiffrement perso (a→z→e)
+const DOUBLE_MAP: Record<string, string> = Object.fromEntries(
+  Object.keys(SECRET_MAP).map((c) => [c, SECRET_MAP[SECRET_MAP[c] ?? c] ?? c]),
+);
+const DOUBLE_REVERSE_MAP: Record<string, string> = Object.fromEntries(
+  Object.keys(SECRET_REVERSE_MAP).map((c) => [
+    c,
+    SECRET_REVERSE_MAP[SECRET_REVERSE_MAP[c] ?? c] ?? c,
+  ]),
+);
+
 type WebkitWindow = Window & {
   SpeechRecognition?: new () => SpeechRecognitionLike;
   webkitSpeechRecognition?: new () => SpeechRecognitionLike;
@@ -156,10 +213,6 @@ function SwapIcon() {
   );
 }
 
-const SECRET_REVERSE_MAP: Record<string, string> = Object.fromEntries(
-  Object.entries(SECRET_MAP).map(([from, to]) => [to, from]),
-);
-
 function convertWithMap(text: string, mapping: Record<string, string>) {
   return text
     .split("")
@@ -174,25 +227,69 @@ function convertWithMap(text: string, mapping: Record<string, string>) {
     .join("");
 }
 
+function getEncodeMap(mode: ModeCode): Record<string, string> {
+  switch (mode) {
+    case "secret": return SECRET_MAP;
+    case "mirror": return MIRROR_MAP;
+    case "shift7": return SHIFT7_MAP;
+    case "rot13": return ROT13_MAP;
+    case "azerty": return AZERTY_MAP;
+    case "double": return DOUBLE_MAP;
+    default: return {};
+  }
+}
+
+function getDecodeMap(mode: ModeCode): Record<string, string> {
+  switch (mode) {
+    case "secret": return SECRET_REVERSE_MAP;
+    case "mirror": return MIRROR_MAP;
+    case "shift7": return SHIFT7_REVERSE_MAP;
+    case "rot13": return ROT13_MAP;
+    case "azerty": return AZERTY_REVERSE_MAP;
+    case "double": return DOUBLE_REVERSE_MAP;
+    default: return {};
+  }
+}
+
 function translateLocal(text: string, source: ModeCode, target: ModeCode) {
-  if (!text) {
-    return "";
-  }
-
-  if (source === target) {
-    return text;
-  }
-
-  if (source === "normal" && target === "secret") {
-    return convertWithMap(text, SECRET_MAP);
-  }
-
-  return convertWithMap(text, SECRET_REVERSE_MAP);
+  if (!text) return "";
+  if (source === target) return text;
+  if (source === "normal") return convertWithMap(text, getEncodeMap(target));
+  return convertWithMap(text, getDecodeMap(source));
 }
 
 function getOppositeMode(mode: ModeCode): ModeCode {
   return mode === "normal" ? "secret" : "normal";
 }
+
+const ALL_SECRET_MODES: ModeCode[] = ["secret", "mirror", "shift7", "rot13", "azerty", "double"];
+
+// Mots courts (2-3 lettres) très fréquents
+const COMMON_FR_WORDS = new Set([
+  "je", "tu", "il", "on", "en", "un", "ma", "ta", "sa", "va",
+  "au", "du", "si", "ou", "et", "ne", "se", "le", "la", "de",
+  "ce", "me", "te", "ai", "as", "ah", "oh", "ok", "ca", "ya",
+  "les", "des", "mes", "tes", "ses", "son", "ton", "mon", "pas",
+  "qui", "que", "par", "sur", "aux", "lui", "oui", "non", "bon",
+  "est", "ont", "une", "ces", "eux", "moi", "toi", "soi", "ici",
+  "nos", "vos", "car", "but", "top", "sec", "nul",
+]);
+
+// Mots longs courants : si le mot décodé est ici, c'est un signal fort
+const COMMON_FR_FULL_WORDS = new Set([
+  "salut", "hello", "merci", "super", "trop", "bien", "tres", "cool",
+  "bonjour", "bonsoir", "bonne", "nuit", "matin", "soir", "jour",
+  "gros", "petit", "grand", "beau", "belle", "vieux", "fort",
+  "quoi", "donc", "alors", "aussi", "encore", "jamais", "toujours",
+  "comment", "pourquoi", "parce", "comme", "quand", "apres", "avant",
+  "nous", "vous", "elle", "elles", "ils", "leur", "cela", "cette",
+  "tout", "tous", "toute", "avec", "sans", "pour", "dans", "mais",
+  "suis", "etes", "sont", "avez", "avons", "font", "fait", "fais",
+  "aller", "venir", "faire", "voir", "dire", "voila", "voici",
+  "maintenant", "demain", "hier", "genre", "grave", "chelou", "zarbi",
+  "ouais", "ouai", "grave", "frere", "poto", "repondre", "attends",
+  "message", "appelle", "reviens", "partir", "viens", "reste",
+]);
 
 function languageNaturalScore(text: string) {
   const letters = text.toLowerCase().replace(/[^a-z]/g, "");
@@ -228,100 +325,90 @@ function languageNaturalScore(text: string) {
 
 function detectSecretInputMode(text: string): ModeCode {
   const lowerText = text.toLowerCase().trim();
-  if (!lowerText) {
-    return "normal";
-  }
+  if (!lowerText) return "normal";
 
-  // Evite les faux positifs sur commandes, code, acronymes et abreviations courantes.
   const knownNormalTokens = new Set([
-    "npm",
-    "run",
-    "build",
-    "start",
-    "dev",
-    "git",
-    "api",
-    "url",
-    "cmd",
-    "cli",
-    "http",
-    "https",
-    "www",
-    "slt",
-    "cv",
-    "r",
-    "ok",
-    "stp",
-    "svp",
-    "mdr",
-    "lol",
-    "tg",
-    "wsh",
-    "js",
-    "ts",
-    "css",
-    "html",
+    "npm", "run", "build", "start", "dev", "git", "api", "url", "cmd", "cli",
+    "http", "https", "www", "slt", "cv", "r", "ok", "stp", "svp", "mdr", "lol",
+    "tg", "wsh", "js", "ts", "css", "html", "rot", "rot13",
   ]);
 
   const rawTokens = lowerText.split(/\s+/g).filter(Boolean);
   if (
     rawTokens.some(
       (token) =>
-        token.includes("/") ||
-        token.includes("-") ||
-        token.includes("_") ||
-        token.includes(".") ||
-        /\d/.test(token),
+        token.includes("/") || token.includes("-") ||
+        token.includes("_") || token.includes(".") || /\d/.test(token),
     )
   ) {
     return "normal";
   }
 
   const plainTokens = rawTokens.map((token) => token.replace(/[^a-z0-9]/g, ""));
-  if (plainTokens.some((token) => knownNormalTokens.has(token))) {
-    return "normal";
-  }
+  if (plainTokens.some((token) => knownNormalTokens.has(token))) return "normal";
 
-  if (plainTokens.every((token) => token.length <= 3)) {
-    return "normal";
-  }
+  const words = text.toLowerCase().split(/[^a-z]+/g).filter((w) => w.length > 1);
+  if (words.length === 0) return "normal";
 
-  const words = text
-    .toLowerCase()
-    .split(/[^a-z]+/g)
-    .filter((word) => word.length > 1);
+  let bestMode: ModeCode = "normal";
+  let bestScore = 0;
 
-  if (words.length === 0) {
-    return "normal";
-  }
+  for (const mode of ALL_SECRET_MODES) {
+    const decodeMap = getDecodeMap(mode);
+    let totalDelta = 0;
+    let strongWords = 0;
+    let analyzableWords = 0;
 
-  let totalDelta = 0;
-  let strongSecretWords = 0;
-  let analyzableWords = 0;
+    for (const word of words) {
+      if (word.length < 4) continue;
+      const decoded = convertWithMap(word, decodeMap);
+      const isKnownWord = COMMON_FR_FULL_WORDS.has(decoded);
+      const hasVowel = /[aeiouy]/.test(word);
 
-  for (const word of words) {
-    if (word.length < 4) {
-      continue;
+      // Mot sans voyelle : on l'inclut seulement s'il décode vers un mot connu
+      if (!hasVowel && !isKnownWord) continue;
+
+      analyzableWords++;
+      const weight = Math.min(2, word.length / 4);
+
+      if (isKnownWord) {
+        totalDelta += 0.6 * weight;
+        strongWords++;
+      } else {
+        const inputScore = languageNaturalScore(word);
+        const decodedScore = languageNaturalScore(decoded);
+        const delta = decodedScore - inputScore;
+        totalDelta += delta * weight;
+        if (delta > 0.11) strongWords++;
+      }
     }
-    analyzableWords += 1;
-    const decodedWord = convertWithMap(word, SECRET_REVERSE_MAP);
-    const inputScore = languageNaturalScore(word);
-    const decodedScore = languageNaturalScore(decodedWord);
-    const weight = Math.min(2, word.length / 4);
-    const delta = decodedScore - inputScore;
-    totalDelta += delta * weight;
-    if (delta > 0.11) {
-      strongSecretWords += 1;
+
+    // Bonus : mots courts (2-3 lettres) qui decodent en mots francais courants
+    let commonWordMatches = 0;
+    let shortWordsChecked = 0;
+    for (const word of words) {
+      if (word.length >= 2 && word.length <= 3) {
+        shortWordsChecked++;
+        const decoded = convertWithMap(word, decodeMap);
+        if (COMMON_FR_WORDS.has(decoded)) commonWordMatches++;
+      }
+    }
+    const shortWordBonus = shortWordsChecked > 0 ? commonWordMatches / shortWordsChecked : 0;
+    const compositeScore = totalDelta + shortWordBonus;
+    const strongRatio = analyzableWords > 0 ? strongWords / analyzableWords : 0;
+    const hasCommonWordSignal = commonWordMatches >= 2;
+
+    if (
+      compositeScore > 0.3 &&
+      (strongRatio >= 0.45 || hasCommonWordSignal) &&
+      compositeScore > bestScore
+    ) {
+      bestScore = compositeScore;
+      bestMode = mode;
     }
   }
 
-  // Mode strict: on passe en secret uniquement avec forte confiance.
-  if (analyzableWords === 0) {
-    return "normal";
-  }
-
-  const strongWordRatio = strongSecretWords / analyzableWords;
-  return totalDelta > 0.3 && strongWordRatio >= 0.45 ? "secret" : "normal";
+  return bestMode;
 }
 
 export default function Home() {
