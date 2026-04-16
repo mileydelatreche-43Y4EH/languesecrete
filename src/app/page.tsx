@@ -3,10 +3,18 @@
 import { useMemo, useState } from "react";
 import styles from "./page.module.css";
 
+type AppView = "secret" | "languages";
 type ModeCode = "normal" | "secret";
+type LanguageCode = "fr" | "en" | "es" | "de" | "it" | "pt";
 
 type ModeOption = {
   code: ModeCode;
+  label: string;
+  voice: string;
+};
+
+type LanguageOption = {
+  code: LanguageCode;
   label: string;
   voice: string;
 };
@@ -37,6 +45,15 @@ type SpeechRecognitionLike = {
 const MODES: ModeOption[] = [
   { code: "normal", label: "Texte normal", voice: "fr-FR" },
   { code: "secret", label: "Langage secret", voice: "fr-FR" },
+];
+
+const LANGUAGES: LanguageOption[] = [
+  { code: "fr", label: "Francais", voice: "fr-FR" },
+  { code: "en", label: "Anglais", voice: "en-US" },
+  { code: "es", label: "Espagnol", voice: "es-ES" },
+  { code: "de", label: "Allemand", voice: "de-DE" },
+  { code: "it", label: "Italien", voice: "it-IT" },
+  { code: "pt", label: "Portugais", voice: "pt-PT" },
 ];
 
 const SECRET_MAP: Record<string, string> = {
@@ -129,34 +146,66 @@ function translateLocal(text: string, source: ModeCode, target: ModeCode) {
   return convertWithMap(text, SECRET_REVERSE_MAP);
 }
 
+function translateLanguageText(
+  text: string,
+  source: LanguageCode,
+  target: LanguageCode,
+) {
+  if (!text.trim()) {
+    return "";
+  }
+
+  if (source === target) {
+    return text;
+  }
+
+  return `[${source.toUpperCase()} -> ${target.toUpperCase()}] ${text}`;
+}
+
 function getOppositeMode(mode: ModeCode): ModeCode {
   return mode === "normal" ? "secret" : "normal";
 }
 
 export default function Home() {
+  const [appView, setAppView] = useState<AppView>("secret");
   const [sourceMode, setSourceMode] = useState<ModeCode>("secret");
   const [targetMode, setTargetMode] = useState<ModeCode>("normal");
+  const [sourceLanguage, setSourceLanguage] = useState<LanguageCode>("fr");
+  const [targetLanguage, setTargetLanguage] = useState<LanguageCode>("en");
   const [sourceText, setSourceText] = useState("NPAKPIT VITDPT");
   const [isListening, setIsListening] = useState(false);
   const [copyStatus, setCopyStatus] = useState<"idle" | "copied">("idle");
 
-  const translatedText = useMemo(
-    () => translateLocal(sourceText, sourceMode, targetMode),
-    [sourceText, sourceMode, targetMode],
-  );
+  const translatedText = useMemo(() => {
+    if (appView === "secret") {
+      return translateLocal(sourceText, sourceMode, targetMode);
+    }
+    return translateLanguageText(sourceText, sourceLanguage, targetLanguage);
+  }, [appView, sourceText, sourceMode, targetMode, sourceLanguage, targetLanguage]);
 
   const sourceVoice = useMemo(
-    () => MODES.find((item) => item.code === sourceMode)?.voice ?? "fr-FR",
-    [sourceMode],
+    () =>
+      appView === "secret"
+        ? MODES.find((item) => item.code === sourceMode)?.voice ?? "fr-FR"
+        : LANGUAGES.find((item) => item.code === sourceLanguage)?.voice ?? "fr-FR",
+    [appView, sourceMode, sourceLanguage],
   );
   const targetVoice = useMemo(
-    () => MODES.find((item) => item.code === targetMode)?.voice ?? "fr-FR",
-    [targetMode],
+    () =>
+      appView === "secret"
+        ? MODES.find((item) => item.code === targetMode)?.voice ?? "fr-FR"
+        : LANGUAGES.find((item) => item.code === targetLanguage)?.voice ?? "fr-FR",
+    [appView, targetMode, targetLanguage],
   );
 
   const handleSwap = () => {
-    setSourceMode(targetMode);
-    setTargetMode(sourceMode);
+    if (appView === "secret") {
+      setSourceMode(targetMode);
+      setTargetMode(sourceMode);
+    } else {
+      setSourceLanguage(targetLanguage);
+      setTargetLanguage(sourceLanguage);
+    }
     setSourceText(translatedText);
   };
 
@@ -216,24 +265,57 @@ export default function Home() {
   return (
     <div className={styles.page}>
       <main className={styles.main}>
+        <div className={styles.topModeSwitch}>
+          <button
+            type="button"
+            className={`${styles.viewButton} ${appView === "secret" ? styles.viewButtonActive : ""}`}
+            onClick={() => {
+              setAppView("secret");
+              setSourceText("");
+            }}
+          >
+            Mode secret
+          </button>
+          <button
+            type="button"
+            className={`${styles.viewButton} ${appView === "languages" ? styles.viewButtonActive : ""}`}
+            onClick={() => {
+              setAppView("languages");
+              setSourceText("");
+            }}
+          >
+            Mode langues
+          </button>
+        </div>
+
         <section className={styles.translator}>
           <article className={styles.panel}>
             <div className={styles.panelTop}>
               <select
                 className={styles.languageSelect}
-                value={sourceMode}
+                value={appView === "secret" ? sourceMode : sourceLanguage}
                 onChange={(event) => {
-                  const nextSourceMode = event.target.value as ModeCode;
-                  setSourceMode(nextSourceMode);
-                  setTargetMode(getOppositeMode(nextSourceMode));
+                  if (appView === "secret") {
+                    const nextSourceMode = event.target.value as ModeCode;
+                    setSourceMode(nextSourceMode);
+                    setTargetMode(getOppositeMode(nextSourceMode));
+                  } else {
+                    setSourceLanguage(event.target.value as LanguageCode);
+                  }
                   setSourceText("");
                 }}
               >
-                {MODES.map((mode) => (
-                  <option key={mode.code} value={mode.code}>
-                    {mode.label}
-                  </option>
-                ))}
+                {appView === "secret"
+                  ? MODES.map((mode) => (
+                      <option key={mode.code} value={mode.code}>
+                        {mode.label}
+                      </option>
+                    ))
+                  : LANGUAGES.map((language) => (
+                      <option key={language.code} value={language.code}>
+                        {language.label}
+                      </option>
+                    ))}
               </select>
             </div>
 
@@ -277,19 +359,29 @@ export default function Home() {
             <div className={styles.panelTop}>
               <select
                 className={styles.languageSelect}
-                value={targetMode}
+                value={appView === "secret" ? targetMode : targetLanguage}
                 onChange={(event) => {
-                  const nextTargetMode = event.target.value as ModeCode;
-                  setTargetMode(nextTargetMode);
-                  setSourceMode(getOppositeMode(nextTargetMode));
+                  if (appView === "secret") {
+                    const nextTargetMode = event.target.value as ModeCode;
+                    setTargetMode(nextTargetMode);
+                    setSourceMode(getOppositeMode(nextTargetMode));
+                  } else {
+                    setTargetLanguage(event.target.value as LanguageCode);
+                  }
                   setSourceText("");
                 }}
               >
-                {MODES.map((mode) => (
-                  <option key={mode.code} value={mode.code}>
-                    {mode.label}
-                  </option>
-                ))}
+                {appView === "secret"
+                  ? MODES.map((mode) => (
+                      <option key={mode.code} value={mode.code}>
+                        {mode.label}
+                      </option>
+                    ))
+                  : LANGUAGES.map((language) => (
+                      <option key={language.code} value={language.code}>
+                        {language.label}
+                      </option>
+                    ))}
               </select>
             </div>
 
