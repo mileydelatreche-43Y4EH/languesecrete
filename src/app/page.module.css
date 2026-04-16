@@ -23,6 +23,7 @@
   border: 1px solid #3b3b3b;
   border-radius: 12px;
   padding: 6px;
+  transform: translateY(-10px);
 }
 
 .viewButton {
@@ -85,6 +86,28 @@
 }
 
 .languageSelect:focus {
+  outline: 2px solid #707070;
+  outline-offset: 1px;
+}
+
+.languageSearch {
+  width: 100%;
+  border: 1px solid #4a4a4a;
+  background: #242424;
+  color: #e7e7e7;
+  border-radius: 12px;
+  padding: 12px 14px;
+  font-size: 18px;
+  font-weight: 500;
+}
+
+.languageSearch::placeholder {
+  color: #a9a9a9;
+  font-size: 14px;
+  font-weight: 400;
+}
+
+.languageSearch:focus {
   outline: 2px solid #707070;
   outline-offset: 1px;
 }
@@ -204,6 +227,10 @@
   }
 
   .languageSelect {
+    font-size: 16px;
+  }
+
+  .languageSearch {
     font-size: 16px;
   }
 

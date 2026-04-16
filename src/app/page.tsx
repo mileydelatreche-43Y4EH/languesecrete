@@ -5,7 +5,35 @@ import styles from "./page.module.css";
 
 type AppView = "secret" | "languages";
 type ModeCode = "normal" | "secret";
-type LanguageCode = "fr" | "en" | "es" | "de" | "it" | "pt";
+type LanguageCode =
+  | "fr"
+  | "en"
+  | "es"
+  | "de"
+  | "it"
+  | "pt"
+  | "ar"
+  | "bg"
+  | "zh"
+  | "ko"
+  | "da"
+  | "nl"
+  | "fi"
+  | "el"
+  | "he"
+  | "hi"
+  | "hu"
+  | "id"
+  | "ja"
+  | "no"
+  | "pl"
+  | "ro"
+  | "ru"
+  | "sv"
+  | "th"
+  | "tr"
+  | "uk"
+  | "vi";
 
 type ModeOption = {
   code: ModeCode;
@@ -54,6 +82,28 @@ const LANGUAGES: LanguageOption[] = [
   { code: "de", label: "Allemand", voice: "de-DE" },
   { code: "it", label: "Italien", voice: "it-IT" },
   { code: "pt", label: "Portugais", voice: "pt-PT" },
+  { code: "ar", label: "Arabe", voice: "ar-SA" },
+  { code: "bg", label: "Bulgare", voice: "bg-BG" },
+  { code: "zh", label: "Chinois", voice: "zh-CN" },
+  { code: "ko", label: "Coreen", voice: "ko-KR" },
+  { code: "da", label: "Danois", voice: "da-DK" },
+  { code: "nl", label: "Neerlandais", voice: "nl-NL" },
+  { code: "fi", label: "Finnois", voice: "fi-FI" },
+  { code: "el", label: "Grec", voice: "el-GR" },
+  { code: "he", label: "Hebreu", voice: "he-IL" },
+  { code: "hi", label: "Hindi", voice: "hi-IN" },
+  { code: "hu", label: "Hongrois", voice: "hu-HU" },
+  { code: "id", label: "Indonesien", voice: "id-ID" },
+  { code: "ja", label: "Japonais", voice: "ja-JP" },
+  { code: "no", label: "Norvegien", voice: "nb-NO" },
+  { code: "pl", label: "Polonais", voice: "pl-PL" },
+  { code: "ro", label: "Roumain", voice: "ro-RO" },
+  { code: "ru", label: "Russe", voice: "ru-RU" },
+  { code: "sv", label: "Suedois", voice: "sv-SE" },
+  { code: "th", label: "Thai", voice: "th-TH" },
+  { code: "tr", label: "Turc", voice: "tr-TR" },
+  { code: "uk", label: "Ukrainien", voice: "uk-UA" },
+  { code: "vi", label: "Vietnamien", voice: "vi-VN" },
 ];
 
 const SECRET_MAP: Record<string, string> = {
@@ -107,6 +157,28 @@ function SpeakerIcon() {
       <path
         fill="currentColor"
         d="M13.5 4.5a1 1 0 0 1 1.707.707v13.586a1 1 0 0 1-1.707.707L8.207 14.207H5a1 1 0 0 1-1-1V10.79a1 1 0 0 1 1-1h3.207L13.5 4.5Zm4.702 1.605a1 1 0 0 1 1.414-.054 8 8 0 0 1 0 11.897 1 1 0 0 1-1.36-1.468 6 6 0 0 0 0-8.961 1 1 0 0 1-.054-1.414Zm-2.44 2.42a1 1 0 0 1 1.41-.084 4.8 4.8 0 0 1 0 7.117 1 1 0 1 1-1.326-1.498 2.8 2.8 0 0 0 0-4.12 1 1 0 0 1-.084-1.414Z"
+      />
+    </svg>
+  );
+}
+
+function CopyIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className={styles.iconSvg} aria-hidden="true">
+      <path
+        fill="currentColor"
+        d="M8 3a2 2 0 0 0-2 2v1H5a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-1h1a2 2 0 0 0 2-2V8.8a2 2 0 0 0-.56-1.39l-2.86-2.99A2 2 0 0 0 13.14 3H8Zm6 2.4 1.72 1.8H14V5.4ZM5 8h8v11H5V8Zm4 3a.9.9 0 1 1 0 1.8H7a.9.9 0 0 1 0-1.8h2Zm2.9 3a.9.9 0 1 1 0 1.8H7a.9.9 0 0 1 0-1.8h4.9Zm0 3a.9.9 0 1 1 0 1.8H7a.9.9 0 0 1 0-1.8h4.9Zm3.1-1h1V9h-2a2 2 0 0 1-2-2V5H8v1h5a2 2 0 0 1 2 2v8Z"
+      />
+    </svg>
+  );
+}
+
+function SwapIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className={styles.iconSvg} aria-hidden="true">
+      <path
+        fill="currentColor"
+        d="M14.5 6a1 1 0 0 1 1.4 0l3.1 3.1a1 1 0 0 1 0 1.4l-3.1 3.1a1 1 0 1 1-1.4-1.4L16.9 10H6a1 1 0 1 1 0-2h10.9l-2.4-2.3a1 1 0 0 1 0-1.4Zm-5 4.4a1 1 0 0 1 0 1.4L7.1 14H18a1 1 0 1 1 0 2H7.1l2.4 2.3a1 1 0 1 1-1.4 1.4L5 16.6a1 1 0 0 1 0-1.4l3.1-3.1a1 1 0 0 1 1.4 0Z"
       />
     </svg>
   );
@@ -166,12 +238,38 @@ function getOppositeMode(mode: ModeCode): ModeCode {
   return mode === "normal" ? "secret" : "normal";
 }
 
+function getLanguageLabel(code: LanguageCode) {
+  return LANGUAGES.find((language) => language.code === code)?.label ?? "Francais";
+}
+
+function resolveLanguageCode(query: string, fallback: LanguageCode): LanguageCode {
+  const cleaned = query.trim().toLowerCase();
+  if (!cleaned) {
+    return fallback;
+  }
+
+  const exactMatch = LANGUAGES.find(
+    (language) =>
+      language.label.toLowerCase() === cleaned || language.code.toLowerCase() === cleaned,
+  );
+  if (exactMatch) {
+    return exactMatch.code;
+  }
+
+  const partialMatch = LANGUAGES.find((language) =>
+    language.label.toLowerCase().startsWith(cleaned),
+  );
+  return partialMatch?.code ?? fallback;
+}
+
 export default function Home() {
   const [appView, setAppView] = useState<AppView>("secret");
   const [sourceMode, setSourceMode] = useState<ModeCode>("secret");
   const [targetMode, setTargetMode] = useState<ModeCode>("normal");
   const [sourceLanguage, setSourceLanguage] = useState<LanguageCode>("fr");
   const [targetLanguage, setTargetLanguage] = useState<LanguageCode>("en");
+  const [sourceLanguageQuery, setSourceLanguageQuery] = useState("Francais");
+  const [targetLanguageQuery, setTargetLanguageQuery] = useState("Anglais");
   const [sourceText, setSourceText] = useState("NPAKPIT VITDPT");
   const [isListening, setIsListening] = useState(false);
   const [copyStatus, setCopyStatus] = useState<"idle" | "copied">("idle");
@@ -205,6 +303,8 @@ export default function Home() {
     } else {
       setSourceLanguage(targetLanguage);
       setTargetLanguage(sourceLanguage);
+      setSourceLanguageQuery(getLanguageLabel(targetLanguage));
+      setTargetLanguageQuery(getLanguageLabel(sourceLanguage));
     }
     setSourceText(translatedText);
   };
@@ -282,6 +382,8 @@ export default function Home() {
             onClick={() => {
               setAppView("languages");
               setSourceText("");
+              setSourceLanguageQuery(getLanguageLabel(sourceLanguage));
+              setTargetLanguageQuery(getLanguageLabel(targetLanguage));
             }}
           >
             Mode langues
@@ -291,32 +393,48 @@ export default function Home() {
         <section className={styles.translator}>
           <article className={styles.panel}>
             <div className={styles.panelTop}>
-              <select
-                className={styles.languageSelect}
-                value={appView === "secret" ? sourceMode : sourceLanguage}
-                onChange={(event) => {
-                  if (appView === "secret") {
+              {appView === "secret" ? (
+                <select
+                  className={styles.languageSelect}
+                  value={sourceMode}
+                  onChange={(event) => {
                     const nextSourceMode = event.target.value as ModeCode;
                     setSourceMode(nextSourceMode);
                     setTargetMode(getOppositeMode(nextSourceMode));
-                  } else {
-                    setSourceLanguage(event.target.value as LanguageCode);
-                  }
-                  setSourceText("");
-                }}
-              >
-                {appView === "secret"
-                  ? MODES.map((mode) => (
-                      <option key={mode.code} value={mode.code}>
-                        {mode.label}
-                      </option>
-                    ))
-                  : LANGUAGES.map((language) => (
-                      <option key={language.code} value={language.code}>
-                        {language.label}
-                      </option>
+                    setSourceText("");
+                  }}
+                >
+                  {MODES.map((mode) => (
+                    <option key={mode.code} value={mode.code}>
+                      {mode.label}
+                    </option>
+                  ))}
+                </select>
+              ) : (
+                <>
+                  <input
+                    className={styles.languageSearch}
+                    list="source-language-options"
+                    value={sourceLanguageQuery}
+                    onChange={(event) => {
+                      const nextQuery = event.target.value;
+                      setSourceLanguageQuery(nextQuery);
+                      const nextCode = resolveLanguageCode(nextQuery, sourceLanguage);
+                      setSourceLanguage(nextCode);
+                      setSourceText("");
+                    }}
+                    onBlur={() => {
+                      setSourceLanguageQuery(getLanguageLabel(sourceLanguage));
+                    }}
+                    placeholder="Rechercher une langue..."
+                  />
+                  <datalist id="source-language-options">
+                    {LANGUAGES.map((language) => (
+                      <option key={language.code} value={language.label} />
                     ))}
-              </select>
+                  </datalist>
+                </>
+              )}
             </div>
 
             <textarea
@@ -351,38 +469,54 @@ export default function Home() {
 
           <div className={styles.swapWrap}>
             <button type="button" className={styles.swapButton} onClick={handleSwap}>
-              ⇄
+              <SwapIcon />
             </button>
           </div>
 
           <article className={styles.panel}>
             <div className={styles.panelTop}>
-              <select
-                className={styles.languageSelect}
-                value={appView === "secret" ? targetMode : targetLanguage}
-                onChange={(event) => {
-                  if (appView === "secret") {
+              {appView === "secret" ? (
+                <select
+                  className={styles.languageSelect}
+                  value={targetMode}
+                  onChange={(event) => {
                     const nextTargetMode = event.target.value as ModeCode;
                     setTargetMode(nextTargetMode);
                     setSourceMode(getOppositeMode(nextTargetMode));
-                  } else {
-                    setTargetLanguage(event.target.value as LanguageCode);
-                  }
-                  setSourceText("");
-                }}
-              >
-                {appView === "secret"
-                  ? MODES.map((mode) => (
-                      <option key={mode.code} value={mode.code}>
-                        {mode.label}
-                      </option>
-                    ))
-                  : LANGUAGES.map((language) => (
-                      <option key={language.code} value={language.code}>
-                        {language.label}
-                      </option>
+                    setSourceText("");
+                  }}
+                >
+                  {MODES.map((mode) => (
+                    <option key={mode.code} value={mode.code}>
+                      {mode.label}
+                    </option>
+                  ))}
+                </select>
+              ) : (
+                <>
+                  <input
+                    className={styles.languageSearch}
+                    list="target-language-options"
+                    value={targetLanguageQuery}
+                    onChange={(event) => {
+                      const nextQuery = event.target.value;
+                      setTargetLanguageQuery(nextQuery);
+                      const nextCode = resolveLanguageCode(nextQuery, targetLanguage);
+                      setTargetLanguage(nextCode);
+                      setSourceText("");
+                    }}
+                    onBlur={() => {
+                      setTargetLanguageQuery(getLanguageLabel(targetLanguage));
+                    }}
+                    placeholder="Rechercher une langue..."
+                  />
+                  <datalist id="target-language-options">
+                    {LANGUAGES.map((language) => (
+                      <option key={language.code} value={language.label} />
                     ))}
-              </select>
+                  </datalist>
+                </>
+              )}
             </div>
 
             <textarea
@@ -400,9 +534,11 @@ export default function Home() {
                 title="Copier la traduction"
                 aria-label="Copier la traduction"
               >
-                <span className={styles.iconGlyph}>
-                  {copyStatus === "copied" ? "✓" : "⧉"}
-                </span>
+                {copyStatus === "copied" ? (
+                  <span className={styles.iconGlyph}>✓</span>
+                ) : (
+                  <CopyIcon />
+                )}
               </button>
               <button
                 type="button"
