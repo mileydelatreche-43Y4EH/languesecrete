@@ -264,6 +264,37 @@ function getOppositeMode(mode: ModeCode): ModeCode {
 
 const ALL_SECRET_MODES: ModeCode[] = ["secret", "mirror", "shift7", "rot13", "azerty", "double"];
 
+// Vérifie si un mot est "proche" d'un mot connu (tolère fautes légères)
+function isApproxKnown(
+  word: string,
+  shortSet: Set<string>,
+  longSet: Set<string>,
+): boolean {
+  if (!word || word.length < 2) return false;
+  const set = word.length <= 3 ? shortSet : longSet;
+  const both = (w: string) => shortSet.has(w) || longSet.has(w);
+
+  // Correspondance exacte
+  if (both(word)) return true;
+
+  // Lettre(s) en trop à la fin (sallut → salut, mdrrrr → mdr)
+  const dedup = word.replace(/(.)\1+/g, "$1");
+  if (both(dedup)) return true;
+
+  // Dernière lettre manquante (salu → salut)
+  if (word.length >= 4 && both(word.slice(0, -1))) return true;
+
+  // Suffixe classique oublié : s, t, e, r, x, z
+  for (const s of ["s", "t", "e", "r", "x", "z"]) {
+    if (set.has(word + s)) return true;
+  }
+
+  // Première lettre manquante (bonjour → onjour type coquille rare)
+  if (word.length >= 5 && both(word.slice(1))) return true;
+
+  return false;
+}
+
 // Mots courts (2-3 lettres) très fréquents — FR + EN + ES
 const COMMON_FR_WORDS = new Set([
   // Français
@@ -374,7 +405,7 @@ function detectSecretInputMode(text: string): ModeCode {
     "flm", "flmm", "tdc", "ntm", "fdp", "pd", "grv", "lvdm", "pq", "clc",
     "mdr", "mdrr", "mdrrr", "mdrrrr", "mdrrrrr",
     "lol", "loll", "lolll", "loool", "looool",
-    "nn", "oe", "oue", "az", "azy", "aze", "vaz", "vazi",
+    "nn", "oe", "oue", "az", "azy", "aze", "vaz", "vazi", "we",
     // Anglais courant court
     "my", "bad", "no", "yes", "hi", "hey", "bye", "omg", "wtf", "lmao",
     "brb", "irl", "imo", "ngl", "tbh", "idk", "idc", "smh", "fyi",
@@ -418,7 +449,7 @@ function detectSecretInputMode(text: string): ModeCode {
     for (const word of words) {
       if (word.length < 4) continue;
       const decoded = convertWithMap(word, decodeMap);
-      const isKnownWord = COMMON_FR_FULL_WORDS.has(decoded);
+      const isKnownWord = isApproxKnown(decoded, COMMON_FR_WORDS, COMMON_FR_FULL_WORDS);
       const hasVowel = /[aeiouy]/.test(word);
 
       // Mot sans voyelle : on l'inclut seulement s'il décode vers un mot connu
@@ -446,7 +477,7 @@ function detectSecretInputMode(text: string): ModeCode {
       if (word.length >= 2 && word.length <= 3) {
         shortWordsChecked++;
         const decoded = convertWithMap(word, decodeMap);
-        if (COMMON_FR_WORDS.has(decoded)) commonWordMatches++;
+        if (isApproxKnown(decoded, COMMON_FR_WORDS, COMMON_FR_FULL_WORDS)) commonWordMatches++;
       }
     }
     const shortWordBonus = shortWordsChecked > 0 ? commonWordMatches / shortWordsChecked : 0;
