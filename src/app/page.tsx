@@ -264,8 +264,9 @@ function getOppositeMode(mode: ModeCode): ModeCode {
 
 const ALL_SECRET_MODES: ModeCode[] = ["secret", "mirror", "shift7", "rot13", "azerty", "double"];
 
-// Mots courts (2-3 lettres) très fréquents
+// Mots courts (2-3 lettres) très fréquents — FR + EN + ES
 const COMMON_FR_WORDS = new Set([
+  // Français
   "je", "tu", "il", "on", "en", "un", "ma", "ta", "sa", "va",
   "au", "du", "si", "ou", "et", "ne", "se", "le", "la", "de",
   "ce", "me", "te", "ai", "as", "ah", "oh", "ok", "ca", "ya",
@@ -273,22 +274,58 @@ const COMMON_FR_WORDS = new Set([
   "qui", "que", "par", "sur", "aux", "lui", "oui", "non", "bon",
   "est", "ont", "une", "ces", "eux", "moi", "toi", "soi", "ici",
   "nos", "vos", "car", "but", "top", "sec", "nul",
+  // Anglais
+  "my", "he", "we", "is", "it", "to", "in", "of", "at", "be",
+  "do", "go", "no", "up", "so", "by", "or", "if", "us", "hi",
+  "yes", "bro", "can", "did", "get", "got", "had", "has", "him",
+  "his", "how", "its", "let", "not", "now", "off", "old", "one",
+  "out", "own", "put", "say", "see", "she", "the", "too", "two",
+  "use", "was", "way", "who", "why", "yet", "you", "are", "for",
+  "and", "but", "imo", "ngl", "omg", "wtf", "lol", "brb", "irl",
+  // Espagnol
+  "yo", "el", "lo", "le", "mi", "su", "al", "con", "por", "que",
+  "una", "los", "las", "del", "sin", "mas", "hay", "fue",
 ]);
 
-// Mots longs courants : si le mot décodé est ici, c'est un signal fort
+// Mots longs courants — FR + EN + ES : signal fort si le décodé est ici
 const COMMON_FR_FULL_WORDS = new Set([
-  "salut", "hello", "merci", "super", "trop", "bien", "tres", "cool",
-  "bonjour", "bonsoir", "bonne", "nuit", "matin", "soir", "jour",
-  "gros", "petit", "grand", "beau", "belle", "vieux", "fort",
-  "quoi", "donc", "alors", "aussi", "encore", "jamais", "toujours",
-  "comment", "pourquoi", "parce", "comme", "quand", "apres", "avant",
-  "nous", "vous", "elle", "elles", "ils", "leur", "cela", "cette",
-  "tout", "tous", "toute", "avec", "sans", "pour", "dans", "mais",
-  "suis", "etes", "sont", "avez", "avons", "font", "fait", "fais",
-  "aller", "venir", "faire", "voir", "dire", "voila", "voici",
+  // Français
+  "salut", "bonjour", "bonsoir", "merci", "super", "trop", "bien", "tres",
+  "cool", "bonne", "nuit", "matin", "soir", "jour", "gros", "petit",
+  "grand", "beau", "belle", "vieux", "fort", "quoi", "donc", "alors",
+  "aussi", "encore", "jamais", "toujours", "comment", "pourquoi", "parce",
+  "comme", "quand", "apres", "avant", "nous", "vous", "elle", "elles",
+  "ils", "leur", "cela", "cette", "tout", "tous", "toute", "avec", "sans",
+  "pour", "dans", "mais", "suis", "etes", "sont", "avez", "avons", "font",
+  "fait", "fais", "aller", "venir", "faire", "voir", "dire", "voila",
   "maintenant", "demain", "hier", "genre", "grave", "chelou", "zarbi",
-  "ouais", "ouai", "grave", "frere", "poto", "repondre", "attends",
-  "message", "appelle", "reviens", "partir", "viens", "reste",
+  "ouais", "frere", "poto", "attends", "message", "appelle", "reviens",
+  "partir", "viens", "reste", "cest", "jtm", "mdr", "ptdr",
+  // Anglais
+  "what", "that", "this", "with", "have", "from", "they", "will", "your",
+  "been", "more", "when", "come", "here", "just", "like", "time", "know",
+  "good", "make", "some", "then", "very", "well", "also", "back", "after",
+  "over", "think", "look", "want", "them", "long", "made", "down", "into",
+  "year", "take", "most", "even", "much", "give", "keep", "turn", "live",
+  "tell", "play", "call", "work", "last", "only", "both", "real", "life",
+  "each", "must", "next", "home", "feel", "move", "open", "same", "than",
+  "them", "then", "these", "those", "should", "could", "would", "about",
+  "right", "there", "their", "which", "where", "while", "again", "going",
+  "hello", "okay", "yeah", "nope", "sure", "nice", "wait", "stop", "help",
+  "please", "sorry", "thank", "later", "really", "actually", "literally",
+  "anyway", "still", "never", "every", "other", "after", "before", "always",
+  "maybe", "night", "today", "tomorrow", "yesterday", "nothing", "something",
+  "everyone", "someone", "anyone", "because", "though", "already", "enough",
+  "miss", "love", "hate", "need", "want", "true", "fake", "bro", "bruh",
+  "dude", "girl", "omfg", "lmao", "lmfao", "noway", "damn", "okay",
+  "mybad", "wassup", "deadass", "lowkey", "highkey", "facts", "word",
+  // Espagnol
+  "hola", "como", "pero", "para", "todo", "esto", "esta", "bien",
+  "aqui", "solo", "hace", "algo", "otra", "quiero", "gracias", "donde",
+  "cuando", "porque", "hasta", "desde", "entre", "sobre", "mismo",
+  "mucho", "muchos", "tiempo", "bueno", "buena", "siempre", "nunca",
+  "mejor", "peor", "nada", "nadie", "todos", "vamos", "claro", "vale",
+  "madre", "padre", "amigo", "amiga", "chico", "chica", "venga", "tios",
 ]);
 
 function languageNaturalScore(text: string) {
@@ -328,12 +365,31 @@ function detectSecretInputMode(text: string): ModeCode {
   if (!lowerText) return "normal";
 
   const knownNormalTokens = new Set([
+    // Tech / commandes
     "npm", "run", "build", "start", "dev", "git", "api", "url", "cmd", "cli",
-    "http", "https", "www", "slt", "cv", "r", "ok", "stp", "svp", "mdr", "lol",
-    "tg", "wsh", "js", "ts", "css", "html", "rot", "rot13",
+    "http", "https", "www", "js", "ts", "css", "html", "rot", "rot13",
+    // Abréviations FR
+    "slt", "cv", "r", "ok", "stp", "svp", "tg", "wsh",
+    "ptdr", "jsp", "jpp", "osef", "bcp", "qqun", "qqch",
+    "flm", "flmm", "tdc", "ntm", "fdp", "pd", "grv", "lvdm", "pq", "clc",
+    "mdr", "mdrr", "mdrrr", "mdrrrr", "mdrrrrr",
+    "lol", "loll", "lolll", "loool", "looool",
+    "nn", "oe", "oue", "az", "azy", "aze", "vaz", "vazi",
+    // Anglais courant court
+    "my", "bad", "no", "yes", "hi", "hey", "bye", "omg", "wtf", "lmao",
+    "brb", "irl", "imo", "ngl", "tbh", "idk", "idc", "smh", "fyi",
+    "asap", "atm", "btw", "eta", "gtg", "hmu", "irl", "nvm", "rn",
+    // Espagnol court
+    "si", "no", "que", "hola", "vale",
   ]);
 
   const rawTokens = lowerText.split(/\s+/g).filter(Boolean);
+
+  // Rires type ahaha, hahaha, ahahah, lollll... → toujours texte normal
+  if (rawTokens.some((token) => /^(a?ha+)+h?$/.test(token) || /^lo+l+$/.test(token))) {
+    return "normal";
+  }
+
   if (
     rawTokens.some(
       (token) =>
