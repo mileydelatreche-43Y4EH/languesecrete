@@ -11,8 +11,12 @@ type ModeCode =
   | "mirror"
   | "shift7"
   | "rot13"
-  | "azerty"
-  | "double";
+  | "shift3"
+  | "double"
+  | "shift11"
+  | "pairs"
+  | "splitmirror"
+  | "triple";
 type LanguageCode =
   | "fr"
   | "en"
@@ -79,13 +83,17 @@ type SpeechRecognitionLike = {
 };
 
 const MODES: ModeOption[] = [
-  { code: "normal", label: "Texte normal", voice: "fr-FR" },
-  { code: "secret", label: "1", voice: "fr-FR" },
-  { code: "mirror", label: "2", voice: "fr-FR" },
-  { code: "shift7", label: "3", voice: "fr-FR" },
-  { code: "rot13", label: "4", voice: "fr-FR" },
-  { code: "azerty", label: "5", voice: "fr-FR" },
-  { code: "double", label: "6", voice: "fr-FR" },
+  { code: "normal",      label: "Texte normal", voice: "fr-FR" },
+  { code: "secret",      label: "1",            voice: "fr-FR" },
+  { code: "mirror",      label: "2",            voice: "fr-FR" },
+  { code: "shift7",      label: "3",            voice: "fr-FR" },
+  { code: "rot13",       label: "4",            voice: "fr-FR" },
+  { code: "shift3",      label: "5",            voice: "fr-FR" },
+  { code: "double",      label: "6",            voice: "fr-FR" },
+  { code: "shift11",     label: "7",            voice: "fr-FR" },
+  { code: "pairs",       label: "8",            voice: "fr-FR" },
+  { code: "splitmirror", label: "9",            voice: "fr-FR" },
+  { code: "triple",      label: "10",           voice: "fr-FR" },
 ];
 
 const LANGUAGES: LanguageOption[] = [
@@ -168,21 +176,39 @@ const ROT13_MAP: Record<string, string> = Object.fromEntries(
   ALPHABET.split("").map((c, i) => [c, ALPHABET[(i + 13) % 26]]),
 );
 
-// Mode Clavier AZERTY : chaque lettre remplacee par sa voisine de droite
-const AZERTY_MAP: Record<string, string> = {
-  a: "z", z: "e", e: "r", r: "t", t: "y", y: "u", u: "i", i: "o", o: "p", p: "a",
-  q: "s", s: "d", d: "f", f: "g", g: "h", h: "j", j: "k", k: "l", l: "m", m: "q",
-  w: "x", x: "c", c: "v", v: "b", b: "n", n: "w",
-};
-const AZERTY_REVERSE_MAP: Record<string, string> = Object.fromEntries(
-  Object.entries(AZERTY_MAP).map(([from, to]) => [to, from]),
+// Mode Decalage +3 : A=D, B=E...
+const SHIFT3_MAP: Record<string, string> = Object.fromEntries(
+  ALPHABET.split("").map((c, i) => [c, ALPHABET[(i + 3) % 26]]),
+);
+const SHIFT3_REVERSE_MAP: Record<string, string> = Object.fromEntries(
+  ALPHABET.split("").map((c, i) => [c, ALPHABET[(i + 23) % 26]]),
+);
+
+// Mode Decalage +11 : A=L, B=M...
+const SHIFT11_MAP: Record<string, string> = Object.fromEntries(
+  ALPHABET.split("").map((c, i) => [c, ALPHABET[(i + 11) % 26]]),
+);
+const SHIFT11_REVERSE_MAP: Record<string, string> = Object.fromEntries(
+  ALPHABET.split("").map((c, i) => [c, ALPHABET[(i + 15) % 26]]),
+);
+
+// Mode Paires : a<->b, c<->d, e<->f... (symetrique)
+const PAIRS_MAP: Record<string, string> = Object.fromEntries(
+  ALPHABET.split("").map((c, i) => [c, i % 2 === 0 ? ALPHABET[i + 1] : ALPHABET[i - 1]]),
+);
+
+// Mode Miroir double : groupe a-m inverse, groupe n-z inverse (symetrique)
+const SPLITMIRROR_MAP: Record<string, string> = Object.fromEntries(
+  ALPHABET.split("").map((c, i) =>
+    i <= 12 ? [c, ALPHABET[12 - i]] : [c, ALPHABET[38 - i]],
+  ),
 );
 
 const SECRET_REVERSE_MAP: Record<string, string> = Object.fromEntries(
   Object.entries(SECRET_MAP).map(([from, to]) => [to, from]),
 );
 
-// Mode Double : application deux fois du chiffrement perso (a→z→e)
+// Mode Double : chiffrement perso applique 2 fois (a→z→e)
 const DOUBLE_MAP: Record<string, string> = Object.fromEntries(
   Object.keys(SECRET_MAP).map((c) => [c, SECRET_MAP[SECRET_MAP[c] ?? c] ?? c]),
 );
@@ -191,6 +217,18 @@ const DOUBLE_REVERSE_MAP: Record<string, string> = Object.fromEntries(
     c,
     SECRET_REVERSE_MAP[SECRET_REVERSE_MAP[c] ?? c] ?? c,
   ]),
+);
+
+// Mode Triple : chiffrement perso applique 3 fois (a→z→e→r)
+const TRIPLE_MAP: Record<string, string> = Object.fromEntries(
+  Object.keys(SECRET_MAP).map((c) => {
+    const s1 = SECRET_MAP[c] ?? c;
+    const s2 = SECRET_MAP[s1] ?? s1;
+    return [c, SECRET_MAP[s2] ?? s2];
+  }),
+);
+const TRIPLE_REVERSE_MAP: Record<string, string> = Object.fromEntries(
+  Object.entries(TRIPLE_MAP).map(([from, to]) => [to, from]),
 );
 
 type WebkitWindow = Window & {
@@ -229,24 +267,32 @@ function convertWithMap(text: string, mapping: Record<string, string>) {
 
 function getEncodeMap(mode: ModeCode): Record<string, string> {
   switch (mode) {
-    case "secret": return SECRET_MAP;
-    case "mirror": return MIRROR_MAP;
-    case "shift7": return SHIFT7_MAP;
-    case "rot13": return ROT13_MAP;
-    case "azerty": return AZERTY_MAP;
-    case "double": return DOUBLE_MAP;
+    case "secret":      return SECRET_MAP;
+    case "mirror":      return MIRROR_MAP;
+    case "shift7":      return SHIFT7_MAP;
+    case "rot13":       return ROT13_MAP;
+    case "shift3":      return SHIFT3_MAP;
+    case "double":      return DOUBLE_MAP;
+    case "shift11":     return SHIFT11_MAP;
+    case "pairs":       return PAIRS_MAP;
+    case "splitmirror": return SPLITMIRROR_MAP;
+    case "triple":      return TRIPLE_MAP;
     default: return {};
   }
 }
 
 function getDecodeMap(mode: ModeCode): Record<string, string> {
   switch (mode) {
-    case "secret": return SECRET_REVERSE_MAP;
-    case "mirror": return MIRROR_MAP;
-    case "shift7": return SHIFT7_REVERSE_MAP;
-    case "rot13": return ROT13_MAP;
-    case "azerty": return AZERTY_REVERSE_MAP;
-    case "double": return DOUBLE_REVERSE_MAP;
+    case "secret":      return SECRET_REVERSE_MAP;
+    case "mirror":      return MIRROR_MAP;
+    case "shift7":      return SHIFT7_REVERSE_MAP;
+    case "rot13":       return ROT13_MAP;
+    case "shift3":      return SHIFT3_REVERSE_MAP;
+    case "double":      return DOUBLE_REVERSE_MAP;
+    case "shift11":     return SHIFT11_REVERSE_MAP;
+    case "pairs":       return PAIRS_MAP;
+    case "splitmirror": return SPLITMIRROR_MAP;
+    case "triple":      return TRIPLE_REVERSE_MAP;
     default: return {};
   }
 }
@@ -262,7 +308,10 @@ function getOppositeMode(mode: ModeCode): ModeCode {
   return mode === "normal" ? "secret" : "normal";
 }
 
-const ALL_SECRET_MODES: ModeCode[] = ["secret", "mirror", "shift7", "rot13", "azerty", "double"];
+const ALL_SECRET_MODES: ModeCode[] = [
+  "secret", "mirror", "shift7", "rot13", "shift3",
+  "double", "shift11", "pairs", "splitmirror", "triple",
+];
 
 // Vérifie si un mot est "proche" d'un mot connu (tolère fautes légères)
 function isApproxKnown(
