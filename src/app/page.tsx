@@ -16,7 +16,8 @@ type ModeCode =
   | "shift11"
   | "pairs"
   | "splitmirror"
-  | "triple";
+  | "triple"
+  | "dynamic";
 type LanguageCode =
   | "fr"
   | "en"
@@ -94,6 +95,7 @@ const MODES: ModeOption[] = [
   { code: "pairs",       label: "8",            voice: "fr-FR" },
   { code: "splitmirror", label: "9",            voice: "fr-FR" },
   { code: "triple",      label: "10",           voice: "fr-FR" },
+  { code: "dynamic",     label: "11",           voice: "fr-FR" },
 ];
 
 const LANGUAGES: LanguageOption[] = [
@@ -265,6 +267,15 @@ function convertWithMap(text: string, mapping: Record<string, string>) {
     .join("");
 }
 
+// Mode Dynamique : decalage = nombre de lettres dans le texte
+function getDynamicShift(text: string): number {
+  return text.replace(/[^a-zA-Z]/g, "").length % 26;
+}
+
+function buildShiftMap(shift: number): Record<string, string> {
+  return Object.fromEntries(ALPHABET.split("").map((c, i) => [c, ALPHABET[(i + shift) % 26]]));
+}
+
 function getEncodeMap(mode: ModeCode): Record<string, string> {
   switch (mode) {
     case "secret":      return SECRET_MAP;
@@ -300,6 +311,17 @@ function getDecodeMap(mode: ModeCode): Record<string, string> {
 function translateLocal(text: string, source: ModeCode, target: ModeCode) {
   if (!text) return "";
   if (source === target) return text;
+
+  if (source === "normal" && target === "dynamic") {
+    const shift = getDynamicShift(text);
+    return convertWithMap(text, buildShiftMap(shift));
+  }
+  if (source === "dynamic") {
+    const shift = getDynamicShift(text);
+    const reverseShift = (26 - shift) % 26;
+    return convertWithMap(text, buildShiftMap(reverseShift));
+  }
+
   if (source === "normal") return convertWithMap(text, getEncodeMap(target));
   return convertWithMap(text, getDecodeMap(source));
 }
@@ -310,7 +332,7 @@ function getOppositeMode(mode: ModeCode): ModeCode {
 
 const ALL_SECRET_MODES: ModeCode[] = [
   "secret", "mirror", "shift7", "rot13", "shift3",
-  "double", "shift11", "pairs", "splitmirror", "triple",
+  "double", "shift11", "pairs", "splitmirror", "triple", "dynamic",
 ];
 
 // Vérifie si un mot est "proche" d'un mot connu (tolère fautes légères)
@@ -491,7 +513,10 @@ function detectSecretInputMode(text: string): ModeCode {
   let bestScore = 0;
 
   for (const mode of ALL_SECRET_MODES) {
-    const decodeMap = getDecodeMap(mode);
+    const isDynamic = mode === "dynamic";
+    const shift = isDynamic ? getDynamicShift(lowerText) : 0;
+    const reverseShift = isDynamic ? (26 - shift) % 26 : 0;
+    const decodeMap = isDynamic ? buildShiftMap(reverseShift) : getDecodeMap(mode);
     let totalDelta = 0;
     let strongWords = 0;
     let analyzableWords = 0;
