@@ -406,6 +406,7 @@ function detectSecretInputMode(text: string): ModeCode {
     "mdr", "mdrr", "mdrrr", "mdrrrr", "mdrrrrr",
     "lol", "loll", "lolll", "loool", "looool",
     "nn", "oe", "oue", "az", "azy", "aze", "vaz", "vazi", "we",
+    "att", "attt", "atttt", "attttt",
     // Anglais courant court
     "my", "bad", "no", "yes", "hi", "hey", "bye", "omg", "wtf", "lmao",
     "brb", "irl", "imo", "ngl", "tbh", "idk", "idc", "smh", "fyi",
