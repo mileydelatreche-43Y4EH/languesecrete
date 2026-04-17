@@ -10,7 +10,7 @@
 }
 
 .pageLight {
-  background: radial-gradient(circle at 20% 16%, #b8bfc9 0%, #a9b1bc 52%, #9aa4b0 100%);
+  background: radial-gradient(circle at 20% 16%, #eef1f5 0%, #e2e7ee 52%, #d5dce6 100%);
 }
 
 .main {
@@ -52,18 +52,18 @@
 }
 
 .pageLight .topModeSwitch {
-  background: #b2bac5;
-  border-color: #8f99a8;
+  background: #e8ecf2;
+  border-color: #c8d0db;
 }
 
 .pageLight .viewButton {
-  color: #2b3749;
+  color: #4a5568;
 }
 
 .pageLight .viewButtonActive {
-  background: #a4aebb;
-  border-color: #8a96a6;
-  color: #0f1924;
+  background: #dde3ec;
+  border-color: #b8c4d2;
+  color: #1a202c;
 }
 
 .translator {
@@ -89,8 +89,8 @@
 }
 
 .pageLight .panel {
-  background: #b0b9c4;
-  border-color: #8f9aaa;
+  background: #eaeff5;
+  border-color: #c8d2de;
 }
 
 .panelTop {
@@ -115,10 +115,10 @@
 }
 
 .pageLight .languageSelect {
-  border-color: #8d98a8;
-  background-color: #b8c0cb;
-  color: #0f1924;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%230f1924' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  border-color: #c2cdd9;
+  background-color: #edf1f7;
+  color: #1a202c;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%231a202c' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right 16px center;
 }
@@ -169,8 +169,8 @@
 }
 
 .pageLight .textarea {
-  background: #bcc4ce;
-  color: #0f1924;
+  background: #f0f4f8;
+  color: #1a202c;
 }
 
 .textarea:focus {
@@ -188,7 +188,7 @@
 }
 
 .pageLight .textarea::placeholder {
-  color: #5a6575;
+  color: #8a97a8;
 }
 
 .panelActions {
